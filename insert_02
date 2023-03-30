@@ -1,0 +1,18 @@
+from faker import Faker
+fake = Faker()
+
+# Define the schema of your table as a list of tuples, where each tuple represents a column name and data type
+schema = [('id', 'INTEGER'), ('name', 'STRING'), ('age', 'INTEGER'), ('email', 'STRING')]
+
+# Generate 10 insert statements with fake data based on column name datatype
+for i in range(10):
+    values = []
+    for column in schema:
+        column_name, column_type = column
+        if column_type == 'INTEGER':
+            value = fake.random_int()
+        elif column_type == 'STRING':
+            value = "'" + fake.word() + "'"
+        values.append(str(value))
+    insert_statement = f"INSERT INTO my_table ({','.join([column[0] for column in schema])}) VALUES ({','.join(values)});"
+    print(insert_statement)
