@@ -22,3 +22,32 @@ for i in range(10):
         values.append(str(value))
     insert_statement = f"INSERT INTO {schema['name']} ({','.join([column[0] for column in columns])}) VALUES ({','.join(values)});"
     print(insert_statement)
+
+
+
+
+{
+  "name": "my_table",
+  "fields": [
+    {
+      "name": "id",
+      "type": "integer",
+      "mode": "nullable"
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "mode": "required"
+    },
+    {
+      "name": "age",
+      "type": "integer",
+      "mode": "nullable"
+    },
+    {
+      "name": "email",
+      "type": "string",
+      "mode": "required"
+    }
+  ]
+}
