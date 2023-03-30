@@ -1,0 +1,24 @@
+import json
+from faker import Faker
+
+fake = Faker()
+
+# Load the JSON schema file
+with open('schema.json') as f:
+    schema = json.load(f)
+
+# Extract the column names and data types from the JSON schema file
+columns = [(column['name'], column['type'].lower(), column.get('mode', 'required').lower()) for column in schema['fields']]
+
+# Generate 10 insert statements with fake data based on column name datatype
+for i in range(10):
+    values = []
+    for column in columns:
+        column_name, column_type, column_mode = column
+        if column_type == 'integer':
+            value = fake.random_int() if column_mode == 'nullable' or column_mode == 'repeated' else fake.random_int(min=1)
+        elif column_type == 'string':
+            value = "'" + fake.word() + "'" if column_mode == 'nullable' or column_mode == 'repeated' else "'" + fake.word() + str(i+1) + "'"
+        values.append(str(value))
+    insert_statement = f"INSERT INTO {schema['name']} ({','.join([column[0] for column in columns])}) VALUES ({','.join(values)});"
+    print(insert_statement)
