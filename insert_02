@@ -1,18 +1,24 @@
+import json
 from faker import Faker
+
 fake = Faker()
 
-# Define the schema of your table as a list of tuples, where each tuple represents a column name and data type
-schema = [('id', 'INTEGER'), ('name', 'STRING'), ('age', 'INTEGER'), ('email', 'STRING')]
+# Load the JSON schema file
+with open('schema.json') as f:
+    schema = json.load(f)
+
+# Extract the column names and data types from the JSON schema file
+columns = [(column['name'], column['type']) for column in schema['fields']]
 
 # Generate 10 insert statements with fake data based on column name datatype
 for i in range(10):
     values = []
-    for column in schema:
+    for column in columns:
         column_name, column_type = column
-        if column_type == 'INTEGER':
+        if column_type == 'integer':
             value = fake.random_int()
-        elif column_type == 'STRING':
+        elif column_type == 'string':
             value = "'" + fake.word() + "'"
         values.append(str(value))
-    insert_statement = f"INSERT INTO my_table ({','.join([column[0] for column in schema])}) VALUES ({','.join(values)});"
+    insert_statement = f"INSERT INTO {schema['name']} ({','.join([column[0] for column in columns])}) VALUES ({','.join(values)});"
     print(insert_statement)
