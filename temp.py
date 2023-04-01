@@ -34,6 +34,6 @@ with open(filename, 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(result[0].keys())
     for row in result:
-        writer.writerow(row.values())
+        writer.writerow([str(value) for value in row.values()])
 
 print('Data written to file:', filename)
