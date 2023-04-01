@@ -9,7 +9,7 @@ username = 'YOUR_SALESFORCE_USERNAME'
 object_name = 'YOUR_SALESFORCE_OBJECT_NAME'
 
 # Authenticate with Salesforce using sfdx
-auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '-v', 'json']).decode('utf-8'))
+auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '--json']).decode('utf-8'))
 access_token = auth_info['result']['accessToken']
 instance_url = auth_info['result']['instanceUrl']
 
