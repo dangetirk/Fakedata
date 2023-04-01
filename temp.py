@@ -15,25 +15,39 @@ if len(sys.argv) < 2:
 object_name = sys.argv[1]
 
 # Authenticate with Salesforce using sfdx
-auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '--json']).decode('utf-8'))
-access_token = auth_info['result']['accessToken']
-instance_url = auth_info['result']['instanceUrl']
+try:
+    auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '--json']).decode('utf-8'))
+    access_token = auth_info['result']['accessToken']
+    instance_url = auth_info['result']['instanceUrl']
+except Exception as e:
+    print('Error authenticating with Salesforce:', e)
+    sys.exit(1)
 
 # Query data from the object using the Salesforce API
-headers = {
-    'Authorization': 'Bearer ' + access_token,
-    'Content-Type': 'application/json'
-}
-query = 'SELECT * FROM {}'.format(object_name)
-url = instance_url + '/services/data/v51.0/query/?q=' + query
-result = json.loads(requests.get(url, headers=headers).text)['records']
+try:
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json'
+    }
+    query = 'SELECT * FROM {}'.format(object_name)
+    url = instance_url + '/services/data/v51.0/query/?q=' + query
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    result = json.loads(response.text)['records']
+except Exception as e:
+    print('Error querying Salesforce:', e)
+    sys.exit(1)
 
 # Write data to CSV file
-filename = '{}_{}.csv'.format(object_name, datetime.now().strftime('%Y%m%d_%H%M%S'))
-with open(filename, 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(result[0].keys())
-    for row in result:
-        writer.writerow([str(value) for value in row.values()])
+try:
+    filename = '{}_{}.csv'.format(object_name, datetime.now().strftime('%Y%m%d_%H%M%S'))
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(result[0].keys())
+        for row in result:
+            writer.writerow([str(value) for value in row.values()])
 
-print('Data written to file:', filename)
+    print('Data written to file:', filename)
+except Exception as e:
+    print('Error writing data to CSV file:', e)
+    sys.exit(1)
