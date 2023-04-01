@@ -29,7 +29,7 @@ try:
         'Authorization': 'Bearer ' + access_token,
         'Content-Type': 'application/json'
     }
-    query = 'SELECT * FROM {}'.format(object_name)
+    query = 'SELECT {} FROM {}'.format(','.join(['{}__c'.format(field['name']) for field in json.loads(subprocess.check_output(['sfdx', 'force:schema:sobject:describe', '-u', username, '-s', object_name, '-json']).decode('utf-8'))['fields']]), object_name)
     url = instance_url + '/services/data/v51.0/query/?q=' + query
     response = requests.get(url, headers=headers)
     response.raise_for_status()
