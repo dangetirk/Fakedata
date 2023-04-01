@@ -1,6 +1,7 @@
 import csv
 import subprocess
 import json
+import requests
 from datetime import datetime
 
 # Replace with your Salesforce credentials and object name
@@ -8,7 +9,7 @@ username = 'YOUR_SALESFORCE_USERNAME'
 object_name = 'YOUR_SALESFORCE_OBJECT_NAME'
 
 # Authenticate with Salesforce using sfdx
-auth_info = json.loads(subprocess.check_output(['sfdx', 'force:org:display', '-u', username, '-j']).decode('utf-8'))
+auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '-v', 'json']).decode('utf-8'))
 access_token = auth_info['result']['accessToken']
 instance_url = auth_info['result']['instanceUrl']
 
