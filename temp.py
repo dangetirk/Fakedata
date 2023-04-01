@@ -3,10 +3,16 @@ import subprocess
 import json
 import requests
 from datetime import datetime
+import sys
 
-# Replace with your Salesforce credentials and object name
+# Replace with your Salesforce credentials
 username = 'YOUR_SALESFORCE_USERNAME'
-object_name = 'YOUR_SALESFORCE_OBJECT_NAME'
+
+# Get the object name from the command line arguments
+if len(sys.argv) < 2:
+    print('Usage: python salesforce_to_csv.py <object_name>')
+    sys.exit(1)
+object_name = sys.argv[1]
 
 # Authenticate with Salesforce using sfdx
 auth_info = json.loads(subprocess.check_output(['sfdx', 'org', 'display', '-u', username, '--json']).decode('utf-8'))
@@ -18,16 +24,16 @@ headers = {
     'Authorization': 'Bearer ' + access_token,
     'Content-Type': 'application/json'
 }
-query = 'SELECT Id, Name, CreatedDate FROM {}'.format(object_name)
+query = 'SELECT * FROM {}'.format(object_name)
 url = instance_url + '/services/data/v51.0/query/?q=' + query
 result = json.loads(requests.get(url, headers=headers).text)['records']
 
 # Write data to CSV file
 filename = '{}_{}.csv'.format(object_name, datetime.now().strftime('%Y%m%d_%H%M%S'))
 with open(filename, 'w', newline='') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=result[0].keys())
-    writer.writeheader()
+    writer = csv.writer(csvfile)
+    writer.writerow(result[0].keys())
     for row in result:
-        writer.writerow(row)
+        writer.writerow(row.values())
 
 print('Data written to file:', filename)
