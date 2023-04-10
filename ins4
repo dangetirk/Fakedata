@@ -1,8 +1,15 @@
-{% test positive_value(model, column_name) %}
-SELECT
- *
-FROM
- {{ model }}
-WHERE
- {{ column_name}} < 1
-{% endtest %}
+{% macro column_length_test(model, max_length) %}
+    {% set table_name = adapter.get_default_schema() ~ '.' ~ model.get('table') %}
+    {% set columns = model.columns %}
+    {% for column in columns %}
+        {% if column.meta.type.name == 'string' %}
+            {% set column_name = column.name %}
+            {% set column_ref = ref(table_name)[column_name] %}
+            {% if not column_ref %}
+                {{ log('Column "' ~ column_name ~ '" not found in "' ~ table_name ~ '"', warn=true) }}
+            {% else %}
+                {{ check_column_length(column_ref, max_length) }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
