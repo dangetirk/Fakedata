@@ -1,15 +1,15 @@
-{% macro column_length_test(model, max_length) %}
-    {% set table_name = adapter.get_default_schema() ~ '.' ~ model.get('table') %}
-    {% set columns = model.columns %}
-    {% for column in columns %}
-        {% if column.meta.type.name == 'string' %}
-            {% set column_name = column.name %}
-            {% set column_ref = ref(table_name)[column_name] %}
-            {% if not column_ref %}
-                {{ log('Column "' ~ column_name ~ '" not found in "' ~ table_name ~ '"', warn=true) }}
-            {% else %}
-                {{ check_column_length(column_ref, max_length) }}
-            {% endif %}
+{% macro column_length_test(column_name, max_length) %}
+    {% set column_ref = ref(column_name) %}
+    {% if not column_ref %}
+        {{ log('Column "' ~ column_name ~ '" not found in model', warn=true) }}
+    {% else %}
+        {% set column_length = column_ref | length %}
+        {% if column_length > max_length %}
+            {{ raise('Value in column "' ~ column_name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
         {% endif %}
-    {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+{% macro length_test(model, column_name, max_length) %}
+    {{ column_length_test(ref(model)[column_name], max_length) }}
 {% endmacro %}
