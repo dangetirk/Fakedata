@@ -1,12 +1,7 @@
-{% macro column_length_test(column_name, max_length) %}
-    {% set column_ref = ref(column_name) %}
-    {% if not column_ref %}
-        {{ log('Column "' ~ column_name ~ '" not found in model', warn=true) }}
-    {% else %}
-        {% set column_length = column_ref | length %}
-        {% if column_length > max_length %}
-            {{ raise('Value in column "' ~ column_name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
-        {% endif %}
+{% macro column_length_test(column_ref, max_length) %}
+    {% set column_length = column_ref | length %}
+    {% if column_length > max_length %}
+        {{ raise('Value in column "' ~ column_ref.column ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
     {% endif %}
 {% endmacro %}
 
