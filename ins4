@@ -1,30 +1,7 @@
-{% macro check_length(column, max_length) %}
-    {% if column is not none %}
-        {% set column_length = column | length %}
-        {% if column_length > max_length %}
-            {{ raise('Column "' ~ column.name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
-        {% endif %}
-    {% endif %}
+{% macro no_nulls_in_columns(model) %}
+ SELECT * FROM {{ model }} WHERE
+ {% for col in adapter.get_columns_in_relation(model) -%}
+ {{ col.column }} IS NULL OR
+ {% endfor %}
+ FALSE
 {% endmacro %}
-
-
-{% macro column_length(column, max_length) %}
-    {% if column is not none %}
-        {% set column_length = column | length %}
-        {% if column_length > max_length %}
-            {{ raise('Column "' ~ column.name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
-        {% endif %}
-    {% endif %}
-{% endmacro %}
-
-{% macro column_length_test(model, column, max_length) %}
-    {% set table_name = adapter.get_default_schema() ~ '.' ~ model.get('table') %}
-    {% set column_name = column %}
-    {% set column = ref(table_name)[column_name] %}
-    {% if not column %}
-        {{ log('Column "' ~ column_name ~ '" not found in "' ~ table_name ~ '"', warn=true) }}
-    {% else %}
-        {{ column_length(column, max_length) }}
-    {% endif %}
-{% endmacro %}
-
