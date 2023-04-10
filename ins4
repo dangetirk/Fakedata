@@ -1,68 +1,30 @@
-import json
-from faker import Faker
-
-fake = Faker()
-
-# Load the JSON schema file
-with open('schema.json') as f:
-    schema = json.load(f)
-
-# Extract the column names, data types, and modes from the JSON schema file
-columns = [(column['name'], column.get('type', 'string').lower(), column.get('mode', 'required').lower()) for column in schema.get('fields', [])]
-
-# Generate 10 insert statements with fake data based on column name datatype
-for i in range(10):
-    values = []
-    for column in columns:
-        column_name, column_type, column_mode = column
-        if column_type == 'integer':
-            value = fake.random_int() if column_mode == 'nullable' or column_mode == 'repeated' else fake.random_int(min=1)
-        elif column_type == 'float':
-            value = fake.pyfloat() if column_mode == 'nullable' or column_mode == 'repeated' else fake.pyfloat(min_value=0, max_value=100)
-        elif column_type == 'boolean':
-            value = fake.boolean() if column_mode == 'nullable' or column_mode == 'repeated' else True
-        elif column_type == 'string':
-            value = "'" + fake.word() + "'" if column_mode == 'nullable' or column_mode == 'repeated' else "'" + fake.word() + str(i+1) + "'"
-        elif column_type == 'date':
-            value = "'" + fake.date() + "'" if column_mode == 'nullable' or column_mode == 'repeated' else "'" + fake.date_between(start_date='-30y', end_date='today') + "'"
-        elif column_type == 'timestamp':
-            value = "'" + fake.iso8601() + "'" if column_mode == 'nullable' or column_mode == 'repeated' else "'" + fake.iso8601(tzinfo=None, end_datetime=None) + "'"
-        values.append(str(value))
-    insert_statement = f"INSERT INTO {schema['name']} ({','.join([column[0] for column in columns])}) VALUES ({','.join(values)});"
-    print(insert_statement)
+{% macro check_length(column, max_length) %}
+    {% if column is not none %}
+        {% set column_length = column | length %}
+        {% if column_length > max_length %}
+            {{ raise('Column "' ~ column.name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
 
 
+{% macro column_length(column, max_length) %}
+    {% if column is not none %}
+        {% set column_length = column | length %}
+        {% if column_length > max_length %}
+            {{ raise('Column "' ~ column.name ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
 
+{% macro column_length_test(model, column, max_length) %}
+    {% set table_name = adapter.get_default_schema() ~ '.' ~ model.get('table') %}
+    {% set column_name = column %}
+    {% set column = ref(table_name)[column_name] %}
+    {% if not column %}
+        {{ log('Column "' ~ column_name ~ '" not found in "' ~ table_name ~ '"', warn=true) }}
+    {% else %}
+        {{ column_length(column, max_length) }}
+    {% endif %}
+{% endmacro %}
 
-
-
-{
-  "name": "my_table",
-  "description": "This is a sample table",
-  "fields": [
-    {
-      "name": "id",
-      "type": "integer",
-      "mode": "required",
-      "description": "The ID of the record"
-    },
-    {
-      "name": "name",
-      "type": "string",
-      "mode": "nullable",
-      "description": "The name of the person"
-    },
-    {
-      "name": "age",
-      "type": "integer",
-      "mode": "nullable",
-      "description": "The age of the person"
-    },
-    {
-      "name": "created_at",
-      "type": "timestamp",
-      "mode": "required",
-      "description": "The timestamp when the record was created"
-    }
-  ]
-}
