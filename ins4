@@ -1,10 +1,8 @@
-{% macro column_length_test(column_ref, max_length) %}
-    {% set column_length = column_ref | length %}
-    {% if column_length > max_length %}
-        {{ raise('Value in column "' ~ column_ref.column ~ '" exceeds maximum length of ' ~ max_length ~ ' characters') }}
-    {% endif %}
-{% endmacro %}
-
-{% macro length_test(model, column_name, max_length) %}
-    {{ column_length_test(ref(model)[column_name], max_length) }}
+{% macro schema_length_check_test(column_name, max_length) %}
+  {{
+    config(
+      materialized='view',
+      post_hook= "select case when length({{ column_name }}) > {{ max_length }} then fail() else pass() end as length_check"
+    )
+  }}
 {% endmacro %}
