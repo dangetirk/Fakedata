@@ -4,6 +4,9 @@ import yaml
 source_file = 'table.csv'
 output_file = 'dbt_tests.yml'
 
+# Define data types for which tests should be generated
+valid_datatypes = ['string', 'time', 'boolean', 'date', 'datetime', 'decimal']
+
 models = []
 with open(source_file, mode='r') as f_in:
     reader = csv.DictReader(f_in)
@@ -13,19 +16,24 @@ with open(source_file, mode='r') as f_in:
         datatype = row['datatype'].lower()
         size = row['size']
         column = {'name': column_name, 'tests': []}
-        if datatype == 'integer':
-            column['tests'].append('schema_check_integer')
-        elif datatype == 'string':
-            column['tests'].append({'test_length': {'max_length': int(size)}})
-        elif datatype == 'date':
-            column['tests'].append('schema_check_date')
-        elif datatype == 'boolean':
-            column['tests'].append('schema_check_boolean')
-        model = next((m for m in models if m['name'] == model_name), None)
-        if model is None:
-            model = {'name': model_name, 'columns': []}
-            models.append(model)
-        model['columns'].append(column)
+        if datatype in valid_datatypes:
+            if datatype == 'string':
+                column['tests'].append({'test_length': {'max_length': int(size)}})
+            elif datatype == 'time':
+                column['tests'].append('schema_check_time')
+            elif datatype == 'date':
+                column['tests'].append('schema_check_date')
+            elif datatype == 'datetime':
+                column['tests'].append('schema_check_datetime')
+            elif datatype == 'decimal':
+                column['tests'].append('schema_check_numeric')
+            elif datatype == 'boolean':
+                column['tests'].append('schema_check_boolean')
+            model = next((m for m in models if m['name'] == model_name), None)
+            if model is None:
+                model = {'name': model_name, 'columns': []}
+                models.append(model)
+            model['columns'].append(column)
 
 with open(output_file, mode='w') as f_out:
     yaml_out = yaml.dump({'models': models}, sort_keys=False)
