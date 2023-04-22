@@ -1,0 +1,10 @@
+table_name,column_name,datatype,size
+emp,empno,integer, 
+emp,enam,string,10
+emp,job,string,20
+emp,hiredate,date,
+emp,check,boolean
+dept,deptno,integer
+dept,dname,string,30
+dept,loc,string,23
+
