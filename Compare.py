@@ -46,8 +46,8 @@ def compare_csv_files(file1_path, file2_path):
             print('Error: Output file not created')
 
     # Print record counts for both files
-    print(f"File 1 has {len(df1.index)} records")
-    print(f"File 2 has {len(df2.index)} records")
+    print(f"{file1_name} has {len(df1.index)} records")
+    print(f"{file2_name} has {len(df2.index)} records")
     #sys.exit(1)
 
     return file1_name, file2_name
