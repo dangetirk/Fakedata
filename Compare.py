@@ -40,7 +40,8 @@ def compare_csv_files(file1_path, file2_path):
         # Write the differences to an Excel file
         diff.to_excel(f'{file1_name}_{file2_name}_diff.xlsx', index=False)
         if os.path.exists(f'{file1_name}_{file2_name}_diff.xlsx'):
-            print('Refer the output file for differences')
+            print(f'Refer the output file for differences- {file1_name}_{file2_name}.xlsx')
+       
             #print(f'File differences written to {file1_name}_{file2_name}_diff.xlsx')
         else:
             print('Error: Output file not created')
@@ -82,7 +83,7 @@ non_repeating = df.drop_duplicates(subset=df.columns[1], keep=False)
 repeating = df[df.duplicated(subset=df.columns[1], keep=False)]
 
 # Write the non-repeating column values to one sheet and the repeating rows to another sheet in a new Excel file
-with pd.ExcelWriter('output_file.xlsx') as writer:
+with pd.ExcelWriter(f'{file1_name}_{file2_name}.xlsx') as writer:
     non_repeating.to_excel(writer, sheet_name='Non-Repeating Column Values', index=False, header=df.columns)
     repeating.to_excel(writer, sheet_name='Repeating Rows', index=False, header=df.columns)
 
