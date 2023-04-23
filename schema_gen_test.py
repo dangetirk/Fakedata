@@ -5,7 +5,7 @@ source_file = 'table.csv'
 output_file = 'dbt_tests.yml'
 
 # Define data types for which tests should be generated
-valid_datatypes = ['string', 'time', 'boolean', 'date', 'datetime', 'decimal']
+valid_datatypes = ['string', 'time', 'boolean', 'date', 'datetime', 'decimal', 'integer']
 
 models = []
 with open(source_file, mode='r') as f_in:
@@ -19,16 +19,19 @@ with open(source_file, mode='r') as f_in:
         if datatype in valid_datatypes:
             if datatype == 'string':
                 column['tests'].append({'test_length': {'max_length': int(size)}})
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'string'}})
             elif datatype == 'time':
-                column['tests'].append('schema_check_time')
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'time'}})
             elif datatype == 'date':
-                column['tests'].append('schema_check_date')
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'date'}})
             elif datatype == 'datetime':
-                column['tests'].append('schema_check_datetime')
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'timestamp'}})
             elif datatype == 'decimal':
-                column['tests'].append('schema_check_numeric')
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'numeric'}})
+            elif datatype == 'integer':
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'integer'}})
             elif datatype == 'boolean':
-                column['tests'].append('schema_check_boolean')
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'boolean'}})
             model = next((m for m in models if m['name'] == model_name), None)
             if model is None:
                 model = {'name': model_name, 'columns': []}
