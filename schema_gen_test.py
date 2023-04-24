@@ -5,7 +5,7 @@ source_file = 'table.csv'
 output_file = 'dbt_tests.yml'
 
 # Define data types for which tests should be generated
-valid_datatypes = ['string', 'time', 'boolean', 'date', 'datetime', 'decimal', 'integer']
+valid_datatypes = ['string', 'time', 'boolean', 'date', 'datetime', 'decimal', 'integer', 'NUMERIC']
 
 models = []
 with open(source_file, mode='r') as f_in:
@@ -18,14 +18,14 @@ with open(source_file, mode='r') as f_in:
         column = {'name': column_name, 'tests': []}
         if datatype in valid_datatypes:
             if datatype == 'string':
-                column['tests'].append({'test_length': {'max_length': int(size)}})
+                column['tests'].append({'length_check': {'max_length': int(size)}})
                 column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'string'}})
             elif datatype == 'time':
                 column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'time'}})
             elif datatype == 'date':
                 column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'date'}})
             elif datatype == 'datetime':
-                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'timestamp'}})
+                column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'datetime'}})
             elif datatype == 'decimal':
                 column['tests'].append({'dbt_expectations.expect_column_values_to_be_of_type': {'column_type': 'numeric'}})
             elif datatype == 'integer':
